@@ -38,44 +38,50 @@
   header.top .left{display:flex;align-items:center;gap:16px;}
   h1{
     font-family: Georgia, "Times New Roman", serif;
-    font-weight:600;font-size:24px;margin:0;color:var(--green);
+    font-weight:600;font-size:25px;letter-spacing:-0.2px;margin:0;color:var(--green);
   }
-  .subtitle{color:var(--ink-soft);font-size:14px;margin-top:4px;}
+  .subtitle{color:var(--ink-soft);font-size:13.5px;margin-top:3px;letter-spacing:0.1px;}
   .tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:24px;}
   .tab{
-    background:none;border:none;cursor:pointer;font-size:15px;
+    background:none;border:none;cursor:pointer;font-size:14.5px;
     padding:10px 2px;color:var(--ink-soft);border-bottom:2px solid transparent;
-    font-family:inherit;
+    font-family:inherit;transition:color .15s ease, border-color .15s ease;
   }
+  .tab:hover{color:var(--green);}
   .tab.active{color:var(--green);border-bottom-color:var(--yellow);font-weight:600;}
   section{display:none;}
   section.active{display:block;}
   .panel{
     background:var(--panel);border:1px solid var(--line);
-    border-radius:6px;padding:20px 22px;margin-bottom:22px;
+    border-radius:8px;padding:20px 22px;margin-bottom:22px;
+    box-shadow:0 1px 3px rgba(31,61,43,0.06), 0 1px 2px rgba(31,61,43,0.04);
   }
   .panel h2{
     font-family: Georgia, "Times New Roman", serif;
-    font-size:17px;margin:0 0 14px;color:var(--green);
+    font-size:17px;margin:0 0 16px;padding-bottom:10px;color:var(--green);
+    border-bottom:1px solid var(--line);
   }
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
-  label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+  label{display:block;font-size:12px;font-weight:600;letter-spacing:0.2px;color:var(--ink-soft);margin-bottom:5px;}
   input,select{
-    width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:4px;
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;
     font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease;
   }
-  input:focus,select:focus{outline:2px solid var(--yellow);outline-offset:1px;}
-  .field{margin-bottom:12px;}
+  input:focus,select:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(227,167,46,0.18);}
+  .field{margin-bottom:14px;}
   button.primary{
-    background:var(--green);color:#fff;border:none;border-radius:4px;
-    padding:9px 18px;font-size:14px;cursor:pointer;font-family:inherit;
+    background:var(--green);color:#fff;border:none;border-radius:6px;
+    padding:10px 20px;font-size:14px;font-weight:600;letter-spacing:0.1px;cursor:pointer;font-family:inherit;
+    transition:background .15s ease, transform .05s ease;
   }
   button.primary:hover{background:#152c1f;}
+  button.primary:active{transform:translateY(1px);}
   button.primary:disabled{background:#9AA79E;cursor:default;}
   button.ghost{
-    background:none;border:1px solid var(--line);border-radius:4px;
+    background:none;border:1px solid var(--line);border-radius:6px;
     padding:6px 10px;font-size:12.5px;cursor:pointer;color:var(--ink-soft);
-    font-family:inherit;
+    font-family:inherit;transition:border-color .15s ease, color .15s ease;
   }
   button.ghost:hover{border-color:var(--clay);color:var(--clay);}
   button.link-btn{
@@ -220,22 +226,22 @@
         </div>
       </div>
       <div class="error" id="r-aviso-conflito" style="display:none; background:var(--danger-bg); border-radius:4px; padding:10px 12px; margin-top:-6px; margin-bottom:12px;"></div>
-      <div class="note" id="r-nota-taxa" style="display:none; margin-top: -4px;">
+      <div class="note" id="r-nota-taxa" style="margin-top: -4px;">
         <div style="font-size:12px; line-height:1.55;">
           <p style="margin:0 0 8px;">Na qualidade de morador (a) do Condomínio dos Ipês, situado na Rua Minas Gerais, 814, bairro: Três Poderes, Imperatriz-MA.</p>
-          <p style="margin:0 0 8px;">Sirvo-me da presente para requisitar para meu uso privativo, o Salão de Festas do Condomínio, para a data e horário acima indicado, pelo que, e na melhor forma de direito, comprometo-me e responsabilizo-me pelo seguinte:</p>
-          <p style="margin:0 0 6px;">1. Pagar taxa de uso do Salão de Festas, equivalente a 15% do valor da taxa de condomínio, atualmente R$ 145,50 (cento e quarenta e cinco reais e cinquenta centavos);</p>
-          <p style="margin:0 0 6px;">2. Utilizar o Salão de Festas por mim, meus familiares e convidados, de tal forma a não perturbar a boa ordem e o sossego dos demais moradores;</p>
-          <p style="margin:0 0 6px;">3. Por todo e qualquer dano (administrativa, civil e criminal, inclusive contra terceiros) sofrido pelo mobiliário, adornos, aparelhos, cortinas, tapetes e demais objetos que guarnecem o referido salão, durante o período de sua utilização;</p>
-          <p style="margin:0;">4. A cumprir os dispostos na Convenção e no Regulamento Interno de uso da área de lazer, sobre os quais tenho total conhecimento.</p>
+          <p style="margin:0 0 8px;">Sirvo-me da presente para requisitar para meu uso privativo, <span class="t-local">o Salão de Festas</span> do Condomínio, para a data e horário acima indicado, pelo que, e na melhor forma de direito, comprometo-me e responsabilizo-me pelo seguinte:</p>
+          <p id="termo-item-taxa" style="margin:0 0 6px;">1. Pagar taxa de uso do Salão de Festas, equivalente a 15% do valor da taxa de condomínio, atualmente R$ 145,00 (cento e quarenta e cinco reais);</p>
+          <p style="margin:0 0 6px;"><span class="t-n2">2</span>. Utilizar <span class="t-local">o Salão de Festas</span> por mim, meus familiares e convidados, de tal forma a não perturbar a boa ordem e o sossego dos demais moradores;</p>
+          <p style="margin:0 0 6px;"><span class="t-n3">3</span>. Por todo e qualquer dano (administrativa, civil e criminal, inclusive contra terceiros) sofrido pelo mobiliário, adornos, aparelhos, cortinas, tapetes e demais objetos que guarnecem <span class="t-referido">o referido salão</span>, durante o período de sua utilização;</p>
+          <p style="margin:0;"><span class="t-n4">4</span>. A cumprir os dispostos na Convenção e no Regulamento Interno de uso da área de lazer, sobre os quais tenho total conhecimento.</p>
         </div>
-        <div style="margin-top:8px; font-size:12.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div id="bloco-pix" style="margin-top:8px; font-size:12.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
           <span><strong>Chave PIX:</strong> <span id="pix-chave">08.174.877/0001-00</span> (CNPJ)</span>
           <button type="button" class="ghost" id="btn-copiar-pix" style="padding:4px 10px; font-size:11.5px;">Copiar PIX</button>
         </div>
         <label style="display:flex; align-items:flex-start; gap:8px; margin-top:10px; font-size:13px; color:var(--ink); cursor:pointer;">
           <input type="checkbox" id="r-aceite-taxa" style="width:auto; margin-top:2px;">
-          <span>Estou de acordo com os termos de uso do local e com a taxa de reserva.</span>
+          <span id="texto-aceite">Estou de acordo com os termos de uso do local e com a taxa de reserva.</span>
         </label>
         <div style="margin-top:12px;">
           <label style="margin-bottom:4px;">Rubrica (assine com o dedo ou mouse)</label>
@@ -372,7 +378,7 @@ function escapeHtml(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function valorTaxa(espaco){
-  return espaco === 'Churrasqueira e Salão' ? 145.50 : 0;
+  return espaco === 'Churrasqueira e Salão' ? 145.00 : 0;
 }
 function ehPago(valor){
   const v = String(valor || '').trim().toLowerCase();
@@ -666,11 +672,24 @@ async function notificarSindico(reserva){
 }
 
 // ---- Formulário ----
+function atualizarTermo(){
+  const comSalao = document.getElementById('r-espaco').value === 'Churrasqueira e Salão';
+  document.getElementById('termo-item-taxa').style.display = comSalao ? 'block' : 'none';
+  document.getElementById('bloco-pix').style.display = comSalao ? 'flex' : 'none';
+  document.querySelectorAll('.t-local').forEach(el => { el.textContent = comSalao ? 'o Salão de Festas' : 'a Churrasqueira'; });
+  document.querySelectorAll('.t-referido').forEach(el => { el.textContent = comSalao ? 'o referido salão' : 'a referida churrasqueira'; });
+  document.querySelector('.t-n2').textContent = comSalao ? '2' : '1';
+  document.querySelector('.t-n3').textContent = comSalao ? '3' : '2';
+  document.querySelector('.t-n4').textContent = comSalao ? '4' : '3';
+  document.getElementById('texto-aceite').textContent = comSalao
+    ? 'Estou de acordo com os termos de uso do local e com a taxa de reserva.'
+    : 'Estou de acordo com os termos de uso do local.';
+}
 document.getElementById('r-espaco').addEventListener('change', () => {
-  const nota = document.getElementById('r-nota-taxa');
-  nota.style.display = (document.getElementById('r-espaco').value === 'Churrasqueira e Salão') ? 'block' : 'none';
+  atualizarTermo();
   verificarConflitoAoVivo();
 });
+atualizarTermo();
 
 // ---- Assinatura (rubrica) ----
 const assinaturaCanvas = document.getElementById('r-assinatura-canvas');
@@ -776,12 +795,12 @@ document.getElementById('r-add').addEventListener('click', async () => {
     errorEl.style.display = 'block';
     return;
   }
-  if(espaco === 'Churrasqueira e Salão' && !document.getElementById('r-aceite-taxa').checked){
-    errorEl.textContent = 'Você precisa marcar que está de acordo com a taxa de reserva para continuar.';
+  if(!document.getElementById('r-aceite-taxa').checked){
+    errorEl.textContent = (espaco === 'Churrasqueira e Salão') ? 'Você precisa marcar que está de acordo com os termos e com a taxa de reserva para continuar.' : 'Você precisa marcar que está de acordo com os termos de uso para continuar.';
     errorEl.style.display = 'block';
     return;
   }
-  if(espaco === 'Churrasqueira e Salão' && !assinaturaTemConteudo){
+  if(!assinaturaTemConteudo){
     errorEl.textContent = 'Assine no campo de rubrica para confirmar sua reserva.';
     errorEl.style.display = 'block';
     return;
@@ -794,14 +813,14 @@ document.getElementById('r-add').addEventListener('click', async () => {
   }
   errorEl.style.display = 'none';
 
-  const assinaturaBase64 = (espaco === 'Churrasqueira e Salão' && assinaturaTemConteudo)
+  const assinaturaBase64 = assinaturaTemConteudo
     ? assinaturaCanvas.toDataURL('image/png')
     : '';
 
   const novaReserva = {
     morador, email, casa, data, espaco,
     horario: inicio, observacao,
-    aceite: espaco === 'Churrasqueira e Salão' ? 'Sim' : '—'
+    aceite: 'Sim'
   };
 
   const urlFormulario = enviarParaGoogleForm({
