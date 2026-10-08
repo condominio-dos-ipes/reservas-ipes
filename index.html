@@ -820,7 +820,7 @@ document.getElementById('r-add').addEventListener('click', async () => {
   const novaReserva = {
     morador, email, casa, data, espaco,
     horario: inicio, observacao,
-    aceite: 'Sim'
+    aceite: espaco === 'Churrasqueira e Salão' ? 'Sim' : 'Não'
   };
 
   const urlFormulario = enviarParaGoogleForm({
