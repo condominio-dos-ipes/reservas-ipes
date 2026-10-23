@@ -166,6 +166,24 @@
     th,td{padding:6px 4px;}
     #r-assinatura-canvas{max-width:100%;}
   }
+
+  .btn-normas{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;border:none;border-radius:6px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin:0 0 20px;}
+  .btn-normas:hover{filter:brightness(1.12);}
+  .link-normas{background:none;border:none;padding:0;color:var(--green);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px;}
+  #modal-normas{position:fixed;inset:0;background:rgba(20,20,20,.55);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;}
+  #modal-normas.open{display:flex;}
+  #modal-normas .box{background:#fff;border-radius:10px;max-width:760px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.3);}
+  #modal-normas .head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);}
+  #modal-normas .head h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:19px;color:var(--green);}
+  #modal-normas .body{overflow:auto;padding:14px 20px 22px;-webkit-overflow-scrolling:touch;}
+  #modal-normas .pre{font-size:13px;color:var(--ink-soft);margin:4px 0 14px;}
+  #modal-normas details{border:1px solid var(--line);border-radius:6px;margin-bottom:8px;background:#fff;}
+  #modal-normas summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:13.5px;color:var(--green);}
+  #modal-normas details[open] summary{border-bottom:1px solid var(--line);}
+  #modal-normas .arts{padding:6px 14px 10px;}
+  #modal-normas .arts p{font-size:13.5px;margin:9px 0;line-height:1.55;}
+  #modal-normas .foot{font-size:12px;color:var(--ink-soft);margin-top:14px;text-align:center;}
+  #modal-normas .tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;}
 </style>
 </head>
 <body>
@@ -182,12 +200,13 @@
       </svg>
       <div>
         <h1 id="titulo-principal">Reservas da área de lazer</h1>
-        <div class="subtitle" id="subtitulo-principal">Condomínio dos Ipês · v2.0</div>
+        <div class="subtitle" id="subtitulo-principal">Condomínio dos Ipês · v2.1</div>
       </div>
     </div>
   </header>
 
   <div id="view-moradores">
+    <button type="button" class="btn-normas" data-abrir-normas>📖 Ler as normas da área de lazer</button>
     <div class="note">
       Reserve com no mínimo 5 dias de antecedência. Confira abaixo as datas já ocupadas antes de pedir a sua.
     </div>
@@ -233,7 +252,7 @@
           <p id="termo-item-taxa" style="margin:0 0 6px;">1. Pagar taxa de uso do Salão de Festas, equivalente a 15% do valor da taxa de condomínio, atualmente R$ 145,00 (cento e quarenta e cinco reais);</p>
           <p style="margin:0 0 6px;"><span class="t-n2">2</span>. Utilizar <span class="t-local">o Salão de Festas</span> por mim, meus familiares e convidados, de tal forma a não perturbar a boa ordem e o sossego dos demais moradores;</p>
           <p style="margin:0 0 6px;"><span class="t-n3">3</span>. Por todo e qualquer dano (administrativa, civil e criminal, inclusive contra terceiros) sofrido pelo mobiliário, adornos, aparelhos, cortinas, tapetes e demais objetos que guarnecem <span class="t-referido">o referido salão</span>, durante o período de sua utilização;</p>
-          <p style="margin:0;"><span class="t-n4">4</span>. A cumprir os dispostos na Convenção e no Regulamento Interno de uso da área de lazer, sobre os quais tenho total conhecimento.</p>
+          <p style="margin:0;"><span class="t-n4">4</span>. A cumprir os dispostos na Convenção e no Regulamento Interno de uso da área de lazer, sobre os quais tenho total conhecimento. <button type="button" class="link-normas" data-abrir-normas>Ler as normas completas</button></p>
         </div>
         <div id="bloco-pix" style="margin-top:8px; font-size:12.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
           <span><strong>Chave PIX:</strong> <span id="pix-chave">08.174.877/0001-00</span> (CNPJ)</span>
@@ -890,10 +909,10 @@ function mostrarView(nome){
   const subtitulo = document.getElementById('subtitulo-principal');
   if(nome === 'admin'){
     titulo.textContent = 'Painel do síndico';
-    subtitulo.textContent = 'Condomínio dos Ipês — acesso restrito · v2.0';
+    subtitulo.textContent = 'Condomínio dos Ipês — acesso restrito · v2.1';
   }else{
     titulo.textContent = 'Reservas da área de lazer';
-    subtitulo.textContent = 'Condomínio dos Ipês · v2.0';
+    subtitulo.textContent = 'Condomínio dos Ipês · v2.1';
   }
 }
 
@@ -921,6 +940,42 @@ document.getElementById('admin-senha').addEventListener('keydown', (e) => {
 document.getElementById('btn-sair-admin').addEventListener('click', () => mostrarView('moradores'));
 
 carregarReservas();
+
+// ---- Normas de conduta (leitura) ----
+const NORMAS = {"preambulo": "O presente documento estabelece normas de conduta para uso da área de lazer do Condomínio dos Ipês, em complemento ao Regimento Interno e à Convenção de Condomínio já registrados, aplicando-se especialmente após a revitalização do espaço (pintura, iluminação externa, área verde, climatização e mobiliário novo). Em caso de omissão, prevalecem as disposições do Regimento Interno e da Convenção.", "capitulos": [{"t": "CAPÍTULO I — DO HORÁRIO DE FUNCIONAMENTO E DO SOM", "a": ["Art. 1º – A área de lazer funcionará das 08h00 às 00h00 (meia-noite), todos os dias da semana.", "Art. 2º – O uso de aparelhos de som na área de lazer é liberado até 22h00, de domingo a quinta-feira, e até 23h00, às sextas-feiras e aos sábados, em volume compatível que não perturbe o sossego dos demais moradores. Esta regra atualiza o horário anteriormente previsto no Regimento Interno (10h-18h), em razão da revitalização do espaço, e deverá ser ratificada em Assembleia ou pelo Conselho Consultivo e Fiscal."]}, {"t": "CAPÍTULO II — DA PISCINA", "a": ["Art. 3º – É terminantemente proibido o uso da piscina por crianças desacompanhadas de responsável. O descumprimento sujeita os pais ou responsáveis à responsabilização e penalização.", "Art. 4º – Problemas de pele ou doenças contagiosas impedem o banho na piscina.", "Art. 5º – É tolerado o uso de protetor solar ou bronzeador, desde que o excesso seja removido na ducha antes da entrada na piscina."]}, {"t": "CAPÍTULO III — DA CHURRASQUEIRA E DO SALÃO", "a": ["Art. 6º – O uso da churrasqueira e/ou do salão depende de reserva prévia, com antecedência mínima de 5 (cinco) dias, feita pelo sistema de reservas do condomínio.", "Art. 7º – Na ausência de reserva antecipada, qualquer condômino/morador poderá utilizá-la, mediante controle cuidadoso da ordem de chegada.", "Art. 8º – A limpeza da área após o uso é de responsabilidade do condômino/morador que efetuou a reserva (multa grupo II).", "Art. 9º – O espaço destina-se exclusivamente a festas e reuniões familiares dos condôminos, sendo vedado o uso por terceiros estranhos ao condomínio.", "Art. 9º-A – O limite de convidados é de até 40 (quarenta) pessoas por evento, respeitando a capacidade estrutural do espaço, definida no projeto da área de lazer. A prioridade das normas é o comportamento durante o uso (ruído, horário, conservação), e não a quantidade de convidados, desde que respeitada a capacidade do local.", "Art. 9º-B – Exceto quando expressamente autorizado pela Administração, fica vedado o uso do espaço para comemorações particulares nas seguintes datas: véspera e dia de Natal; véspera e dia de Ano-Novo; Carnaval; Dia das Mães; Dia das Crianças; e Dia dos Pais.", "Art. 9º-C – O uso do espaço fica condicionado à prévia assinatura, pelo condômino responsável, de termo de responsabilidade, atestando o recebimento das dependências e utensílios em perfeitas condições de uso e assumindo o ônus por qualquer dano causado, inclusive por familiares, convidados e prepostos.", "Art. 9º-D – Ao término do uso, o condômino responsável deverá, em conjunto com funcionário designado pela Administração, conferir as instalações e equipamentos utilizados, registrando eventuais danos para fins de ressarcimento."]}, {"t": "CAPÍTULO IV — DO CLIMATIZADOR / VENTILADOR COM ÁGUA", "a": ["Art. 10º – O uso do climatizador instalado na área de lazer é liberado durante o horário de funcionamento do espaço.", "Art. 11º – O último usuário presente no espaço deve desligar o equipamento ao sair, evitando desgaste desnecessário e consumo excessivo de energia.", "Art. 12º – É vedado manipular, ajustar ou realizar qualquer intervenção técnica no equipamento, cabendo eventuais reparos exclusivamente a pessoal autorizado pelo Síndico ou Administração."]}, {"t": "CAPÍTULO IV-A — DA TAXA DE RESERVA", "a": ["Art. 12º-A – A reserva da área de lazer para eventos (churrasqueira e/ou salão) estará sujeita ao pagamento de taxa de uso/conservação correspondente a 15% (quinze por cento) do valor da taxa condominial, atualmente equivalente a aproximadamente R$ 145,00 (cento e quarenta e cinco reais), sujeito a atualização proporcional ao reajuste da taxa condominial. Valor e percentual definidos em Assembleia.", "Art. 12º-B – A taxa deverá ser paga previamente à data de uso, revertendo-se à manutenção e conservação da área de lazer.", "Art. 12º-C – Regra originalmente inspirada no Regimento Interno do Condomínio Acapulco, posteriormente ajustada e ratificada em Assembleia conforme a realidade do Condomínio dos Ipês.", "Art. 12º-D – Em caso de desistência da reserva, o condômino terá direito a remarcar a data para uso posterior, não sendo restituído qualquer valor já pago a título de taxa de reserva."]}, {"t": "CAPÍTULO V — DA MOBÍLIA E DA ÁREA VERDE", "a": ["Art. 13º – A mobília instalada na área de lazer é de uso comum e deve ser conservada por todos; é vedado retirá-la do espaço ou expô-la a condições que acelerem seu desgaste.", "Art. 14º – Danos identificados na mobília, iluminação ou demais benfeitorias devem ser comunicados imediatamente ao Síndico.", "Art. 15º – É proibido pisar nos canteiros e jardins, bem como descartar lixo, pontas de cigarro ou líquidos nas áreas ajardinadas.", "Art. 16º – É proibido manipular, sob qualquer pretexto, quadros elétricos, fiação ou instalações relativas à iluminação da área comum, conforme já vedado pelo Regimento Interno (multa grupo II).", "Art. 16º-A – É proibido o uso de patins, skates e bicicletas nas áreas com piso cerâmico, a fim de evitar risco de queda e desgaste do piso revitalizado.", "Art. 16º-B – É proibido fumar nas áreas fechadas ou cobertas do espaço de lazer.", "Art. 16º-C – A montagem de brinquedos infláveis ou recreativos (pula-pula, piscina de bolinhas e similares) só é permitida em área externa determinada, sendo vedada sua instalação no espaço coberto.", "Art. 16º-D – É proibida a perfuração de paredes e teto, bem como a fixação de adesivos ou painéis decorativos sem autorização prévia do Síndico, sob pena de o responsável arcar com o custo integral do reparo."]}, {"t": "CAPÍTULO VI — DISPOSIÇÕES GERAIS", "a": ["Art. 17º – O condômino/morador que utilizar o espaço deve deixá-lo em condições de uso para o próximo, cabendo a todos zelar pela conservação da área recém-revitalizada.", "Art. 18º – As infrações às presentes normas serão enquadradas nos grupos de multa (I, II ou III) já estabelecidos no Regimento Interno, conforme a gravidade e a reincidência.", "Art. 19º – Casos omissos serão resolvidos pelo Síndico, ouvido o Conselho Consultivo e Fiscal quando necessário."]}], "rodape": "Atualizado em 07/10/2026 · Tiago Botelho Martins — Síndico"};
+document.addEventListener('DOMContentLoaded', function(){
+  const modal=document.getElementById('modal-normas');
+  const lista=document.getElementById('normas-lista');
+  document.getElementById('normas-pre').textContent=NORMAS.preambulo;
+  document.getElementById('normas-rodape').textContent=NORMAS.rodape;
+  NORMAS.capitulos.forEach(function(c){
+    const d=document.createElement('details');
+    const s=document.createElement('summary'); s.textContent=c.t; d.appendChild(s);
+    const w=document.createElement('div'); w.className='arts';
+    c.a.forEach(function(a){ const p=document.createElement('p'); p.textContent=a; w.appendChild(p); });
+    d.appendChild(w); lista.appendChild(d);
+  });
+  function abrir(){ modal.classList.add('open'); document.body.style.overflow='hidden'; }
+  function fechar(){ modal.classList.remove('open'); document.body.style.overflow=''; }
+  document.querySelectorAll('[data-abrir-normas]').forEach(function(b){ b.addEventListener('click', abrir); });
+  document.getElementById('normas-fechar').addEventListener('click', fechar);
+  modal.addEventListener('click', function(e){ if(e.target===modal) fechar(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') fechar(); });
+  document.getElementById('normas-abrir-todas').addEventListener('click', function(){ lista.querySelectorAll('details').forEach(function(x){x.open=true;}); });
+  document.getElementById('normas-fechar-todas').addEventListener('click', function(){ lista.querySelectorAll('details').forEach(function(x){x.open=false;}); });
+});
 </script>
+
+<div id="modal-normas" role="dialog" aria-modal="true" aria-labelledby="normas-titulo">
+  <div class="box">
+    <div class="head"><h3 id="normas-titulo">Normas de conduta da área de lazer</h3><button type="button" class="ghost" id="normas-fechar">Fechar</button></div>
+    <div class="body">
+      <p class="pre" id="normas-pre"></p>
+      <div class="tools"><button type="button" class="ghost" id="normas-abrir-todas">Abrir todos os capítulos</button><button type="button" class="ghost" id="normas-fechar-todas">Recolher todos</button></div>
+      <div id="normas-lista"></div>
+      <p class="foot" id="normas-rodape"></p>
+    </div>
+  </div>
+</div>
 </body>
 </html>
