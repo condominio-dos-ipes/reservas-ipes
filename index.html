@@ -102,6 +102,17 @@
   .badge.pendente{background:var(--warn-bg);color:var(--yellow-deep);}
   .badge.aprovado{background:var(--ok-bg);color:var(--ok);}
   .badge.realizado{background:#EDEAE2;color:var(--ink-soft);}
+  .badge.realizado{background:#E6E8EA;color:#5c6168;}
+  tr.linha-realizada td{color:#8a8f95;background:#FAFAFA;}
+  tr.linha-realizada td:first-child::before{content:"✓ ";font-weight:700;}
+  .cal-day.passado{background:rgba(120,125,130,0.2);color:#6b7075;}
+  .cal-day.passado::after{content:"✓";font-size:9px;display:block;line-height:6px;}
+  .hist-box{margin-top:16px;border:1px solid var(--line);border-radius:6px;}
+  .hist-box summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:13.5px;color:var(--green);}
+  .hist-box .hist-body{padding:6px 14px 14px;}
+  .filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px;font-size:13px;color:var(--ink-soft);}
+  .filtros select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:#fff;}
+  .btn-mais{margin:12px 0 2px;}
   .badge.cancelado{background:var(--danger-bg);color:var(--danger);}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
   .stat{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;}
@@ -298,6 +309,7 @@
       <div style="display:flex; gap:16px; margin-top:14px; font-size:12.5px; color:var(--ink-soft); flex-wrap:wrap;">
         <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#4C9A5A; margin-right:5px;"></span>Livre</span>
         <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#C0453D; margin-right:5px;"></span>Reservado</span>
+        <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#9AA0A6; margin-right:5px;"></span>Já realizado ✓</span>
       </div>
     </div>
 
@@ -463,6 +475,27 @@ function parseCSV(texto){
 
 let reservas = [];
 
+function statusEfetivo(r){
+  if(String(r.status || '').trim().toLowerCase() === 'cancelado') return 'Cancelado';
+  return (r.data && r.data < hojeISO()) ? 'Realizado' : 'Aprovado';
+}
+function ymDe(r){ return (r.data || '').slice(0, 7); }
+function ymLabel(ym){
+  const p = ym.split('-'); const m = parseInt(p[1], 10) - 1;
+  return (MESES[m] || ym) + ' de ' + p[0];
+}
+function opcoesMes(lista, selecionado, todosRotulo){
+  const set = Array.from(new Set(lista.map(ymDe).filter(Boolean))).sort().reverse();
+  let h = '<option value="">' + todosRotulo + '</option>';
+  set.forEach(ym => { h += '<option value="' + ym + '"' + (ym === selecionado ? ' selected' : '') + '>' + ymLabel(ym) + '</option>'; });
+  return h;
+}
+// estado das listas
+let pubLimite = 10, pubHistAberto = false, pubHistMes = '', pubHistLimite = 10;
+let admFiltro = 'proximas', admMes = '', admLimite = 20;
+let finMes = '', finLimite = 20;
+
+
 // Pendentes ficam salvas no navegador (localStorage), sobrevivendo a atualizações de página (F5),
 // até serem confirmadas na planilha.
 const LOCAL_KEY = 'ipes-reservas-pendentes';
@@ -516,7 +549,7 @@ async function carregarReservas(){
     salvarPendentesLocal(reservasLocaisPendentes);
 
     // A planilha é a fonte da verdade + o que ainda está pendente de aparecer nela
-    reservas = daPlanilha.concat(reservasLocaisPendentes);
+    reservas = daPlanilha.concat(reservasLocaisPendentes).map(r => Object.assign({}, r, { status: statusEfetivo(r) }));
   }catch(e){
     // Se der erro de leitura, mantém o que já estava na tela (não apaga nada)
   }
@@ -525,6 +558,17 @@ async function carregarReservas(){
   renderFinanceiro();
 }
 
+function linhaPublico(r, realizada){
+  let h = '<tr' + (realizada ? ' class="linha-realizada"' : '') + '>';
+  h += '<td>' + fmtDate(r.data) + '</td>';
+  h += '<td>' + escapeHtml(r.casa || '—') + '</td>';
+  h += '<td>' + escapeHtml(r.morador) + '</td>';
+  h += '<td>' + escapeHtml(r.espaco) + '</td>';
+  h += '<td>' + escapeHtml(r.horario || '—') + '</td>';
+  h += '<td><span class="badge ' + r.status.toLowerCase() + '">' + r.status + '</span></td>';
+  return h + '</tr>';
+}
+const CAB_PUBLICO = '<table><thead><tr><th>Data</th><th>Casa</th><th>Morador</th><th>Espaço</th><th>Horário</th><th>Status</th></tr></thead><tbody>';
 function renderPublico(){
   const list = document.getElementById('r-list-publico');
   const ativas = reservas.filter(r => r.status !== 'Cancelado');
@@ -532,19 +576,32 @@ function renderPublico(){
     list.innerHTML = '<div class="empty">Nenhuma reserva registrada ainda.</div>';
     return;
   }
-  const sorted = [...ativas].sort((a,b) => (a.data || '').localeCompare(b.data || ''));
-  let html = '<table><thead><tr><th>Data</th><th>Casa</th><th>Morador</th><th>Espaço</th><th>Horário</th><th>Status</th></tr></thead><tbody>';
-  sorted.forEach(r => {
-    html += '<tr>';
-    html += '<td>' + fmtDate(r.data) + '</td>';
-    html += '<td>' + escapeHtml(r.casa || '—') + '</td>';
-    html += '<td>' + escapeHtml(r.morador) + '</td>';
-    html += '<td>' + escapeHtml(r.espaco) + '</td>';
-    html += '<td>' + escapeHtml(r.horario || '—') + '</td>';
-    html += '<td><span class="badge ' + r.status.toLowerCase() + '">' + r.status + '</span></td>';
-    html += '</tr>';
-  });
-  html += '</tbody></table>';
+  const hoje = hojeISO();
+  const prox = ativas.filter(r => (r.data || '') >= hoje).sort((a,b) => (a.data || '').localeCompare(b.data || ''));
+  const pass = ativas.filter(r => (r.data || '') < hoje).sort((a,b) => (b.data || '').localeCompare(a.data || ''));
+  let html = '';
+  if(prox.length === 0){
+    html += '<div class="empty">Nenhuma reserva futura. Todas as datas estão livres.</div>';
+  }else{
+    html += CAB_PUBLICO;
+    prox.slice(0, pubLimite).forEach(r => { html += linhaPublico(r, false); });
+    html += '</tbody></table>';
+    if(prox.length > pubLimite){
+      html += '<button type="button" class="ghost btn-mais" onclick="pubLimite+=10;renderPublico()">Ver mais (' + (prox.length - pubLimite) + ' restantes)</button>';
+    }
+  }
+  if(pass.length > 0){
+    const doMes = pubHistMes ? pass.filter(r => ymDe(r) === pubHistMes) : pass;
+    html += '<details class="hist-box"' + (pubHistAberto ? ' open' : '') + ' ontoggle="pubHistAberto=this.open"><summary>Reservas realizadas (' + pass.length + ')</summary><div class="hist-body">';
+    html += '<div class="filtros"><label>Mês: <select onchange="pubHistMes=this.value;pubHistLimite=10;renderPublico()">' + opcoesMes(pass, pubHistMes, 'Todos os meses') + '</select></label></div>';
+    html += CAB_PUBLICO;
+    doMes.slice(0, pubHistLimite).forEach(r => { html += linhaPublico(r, true); });
+    html += '</tbody></table>';
+    if(doMes.length > pubHistLimite){
+      html += '<button type="button" class="ghost btn-mais" onclick="pubHistLimite+=10;renderPublico()">Ver mais (' + (doMes.length - pubHistLimite) + ' restantes)</button>';
+    }
+    html += '</div></details>';
+  }
   list.innerHTML = html;
 }
 
@@ -554,10 +611,29 @@ function renderAdmin(){
     list.innerHTML = '<div class="empty">Nenhuma reserva registrada ainda.</div>';
     return;
   }
-  const sorted = [...reservas].sort((a,b) => (a.data || '').localeCompare(b.data || ''));
-  let html = '<table><thead><tr><th>Data</th><th>Casa</th><th>Morador</th><th>E-mail</th><th>Espaço</th><th>Horário</th><th>Observação</th><th>Taxa</th><th>Aceite</th><th>Taxa paga</th><th>Status</th></tr></thead><tbody>';
-  sorted.forEach(r => {
-    html += '<tr>';
+  const hoje = hojeISO();
+  let base = reservas.slice();
+  if(admFiltro === 'proximas') base = base.filter(r => r.status !== 'Cancelado' && (r.data || '') >= hoje);
+  else if(admFiltro === 'realizadas') base = base.filter(r => r.status === 'Realizado');
+  else if(admFiltro === 'canceladas') base = base.filter(r => r.status === 'Cancelado');
+  const mesesBase = base;
+  if(admMes) base = base.filter(r => ymDe(r) === admMes);
+  const asc = admFiltro === 'proximas';
+  base.sort((a,b) => asc ? (a.data || '').localeCompare(b.data || '') : (b.data || '').localeCompare(a.data || ''));
+  let html = '<div class="filtros"><label>Mostrar: <select onchange="admFiltro=this.value;admMes=\'\';admLimite=20;renderAdmin()">'
+    + '<option value="proximas"' + (admFiltro==='proximas'?' selected':'') + '>Próximas</option>'
+    + '<option value="realizadas"' + (admFiltro==='realizadas'?' selected':'') + '>Realizadas</option>'
+    + '<option value="canceladas"' + (admFiltro==='canceladas'?' selected':'') + '>Canceladas</option>'
+    + '<option value="todas"' + (admFiltro==='todas'?' selected':'') + '>Todas</option></select></label>'
+    + '<label>Mês: <select onchange="admMes=this.value;admLimite=20;renderAdmin()">' + opcoesMes(mesesBase, admMes, 'Todos os meses') + '</select></label>'
+    + '<span>' + base.length + ' reserva(s)</span></div>';
+  if(base.length === 0){
+    list.innerHTML = html + '<div class="empty">Nenhuma reserva neste filtro.</div>';
+    return;
+  }
+  html += '<table><thead><tr><th>Data</th><th>Casa</th><th>Morador</th><th>E-mail</th><th>Espaço</th><th>Horário</th><th>Observação</th><th>Taxa</th><th>Aceite</th><th>Taxa paga</th><th>Status</th></tr></thead><tbody>';
+  base.slice(0, admLimite).forEach(r => {
+    html += '<tr' + (r.status === 'Realizado' ? ' class="linha-realizada"' : '') + '>';
     html += '<td>' + fmtDate(r.data) + '</td>';
     html += '<td>' + escapeHtml(r.casa || '—') + '</td>';
     html += '<td>' + escapeHtml(r.morador) + '</td>';
@@ -572,6 +648,9 @@ function renderAdmin(){
     html += '</tr>';
   });
   html += '</tbody></table>';
+  if(base.length > admLimite){
+    html += '<button type="button" class="ghost btn-mais" onclick="admLimite+=20;renderAdmin()">Mostrar mais (' + (base.length - admLimite) + ' restantes)</button>';
+  }
   list.innerHTML = html;
 }
 
@@ -594,9 +673,11 @@ function renderFinanceiro(){
     list.innerHTML = '<div class="empty">Nenhuma reserva de Churrasqueira e Salão registrada ainda.</div>';
     return;
   }
-  const sorted = [...cobrancas].sort((a,b) => (b.data || '').localeCompare(a.data || ''));
-  let html = '<table><thead><tr><th>Data</th><th>Casa</th><th>Morador</th><th class="rowend">Valor</th><th>Pago?</th></tr></thead><tbody>';
-  sorted.forEach(r => {
+  const filtrado = finMes ? cobrancas.filter(r => ymDe(r) === finMes) : cobrancas;
+  const sorted = [...filtrado].sort((a,b) => (b.data || '').localeCompare(a.data || ''));
+  let html = '<div class="filtros"><label>Mês: <select onchange="finMes=this.value;finLimite=20;renderFinanceiro()">' + opcoesMes(cobrancas, finMes, 'Todos os meses') + '</select></label><span>' + filtrado.length + ' cobrança(s)</span></div>';
+  html += '<table><thead><tr><th>Data</th><th>Casa</th><th>Morador</th><th class="rowend">Valor</th><th>Pago?</th></tr></thead><tbody>';
+  sorted.slice(0, finLimite).forEach(r => {
     html += '<tr>';
     html += '<td>' + fmtDate(r.data) + '</td>';
     html += '<td>' + escapeHtml(r.casa || '—') + '</td>';
@@ -606,6 +687,9 @@ function renderFinanceiro(){
     html += '</tr>';
   });
   html += '</tbody></table>';
+  if(sorted.length > finLimite){
+    html += '<button type="button" class="ghost btn-mais" onclick="finLimite+=20;renderFinanceiro()">Mostrar mais (' + (sorted.length - finLimite) + ' restantes)</button>';
+  }
   list.innerHTML = html;
 }
 
@@ -636,7 +720,7 @@ function renderCalendario(){
     const iso = calAnoAtual + '-' + mesStr + '-' + diaStr;
     const ocupado = diasOcupados.has(iso);
     const ehHoje = iso === hoje;
-    html += '<div class="cal-day' + (ehHoje ? ' hoje' : '') + ' ' + (ocupado ? 'ocupado' : 'livre') + '">' + dia + '</div>';
+    html += '<div class="cal-day' + (ehHoje ? ' hoje' : '') + ' ' + (ocupado ? (iso < hoje ? 'passado' : 'ocupado') : 'livre') + '">' + dia + '</div>';
   }
   html += '</div>';
   document.getElementById('cal-grid').innerHTML = html;
